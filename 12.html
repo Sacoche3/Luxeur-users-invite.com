@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre Solde</title>
+    <style>
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #4CAF50;
+            --background-color: #f5f5f5;
+            --text-color: #333;
+            --vip-color: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            padding-bottom: 70px;
+        }
+
+        .vip-container {
+            background-color: var(--vip-color);
+            color: var(--text-color);
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            margin: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .email-section {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .balance-container {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            margin: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .balance {
+            font-size: 2em;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .earnings-info {
+            margin-top: 15px;
+            font-size: 0.9em;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.3s;
+        }
+
+        .action-button:hover {
+            background-color: #0056b3;
+        }
+
+        .fixed-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .footer-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .footer-button:hover {
+            background-color: #45a049;
+        }
+
+        @media (max-width: 600px) {
+            .action-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="vip-container">
+        <h2>VIP <span id="vipStatus">0</span></h2>
+    </div>
+
+    <div class="email-section">
+        Adresse e-mail : <span id="userEmail">non connecté</span>
+    </div>
+
+    <div class="balance-container">
+        <h2>Votre Solde</h2>
+        <div id="balance" class="balance">XOF 0</div>
+        <div class="earnings-info">
+            <p>Gain journalier : <span id="dailyEarnings">00 X

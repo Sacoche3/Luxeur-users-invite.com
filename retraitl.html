@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faire une Demande de Retrait</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        .message {
+            color: green;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Faire une Demande de Retrait</h1>
+        <form id="withdrawRequestForm">
+            <input type="number" id="amount" placeholder="Montant à retirer" required />
+            <button type="submit">Soumettre la Demande</button>
+        </form>
+        <div class="message" id="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getDatabase, ref, onValue, push } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
+            authDomain: "ciaxe-727b1.firebaseapp.com",
+            databaseURL: "https://ciaxe-727b1-default-rtdb.firebaseio.com",
+            projectId: "ciaxe-727b1",
+            storageBucket: "ciaxe-727b1.appspot.com",
+            messagingSenderId: "52732576686",
+            appId: "1:52732576686:web:70f5d27fc58bc5bd31fe3f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const database = getDatabase();
+
+        // Soumettre la demande de retrait
+        document.getElementById('withdrawRequestForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const user = auth.currentUser;
+
+            if (user) {
+                const amountToWithdraw = parseFloat(document.getElementById('amount').value);
+
+                const withdrawalAccountRef = ref(database, 'users/' + user.uid + '/withdrawalAccount');
+                onValue(withdrawalAccountRef, (snapshot) => {
+                    const withdrawalAccount = snapshot.val();
+                    if (withdrawalAccount) {
+                        const withdrawalData = {
+                            amount: amountToWithdraw,
+                            operator: withdrawalAccount.operator,
+                            withdrawNumber: withdrawalAccount.withdrawNumber,
+                            date: new Date().toLocaleString(),
+                            status: 'En attente'
+                        };
+
+                        const withdrawalRequestsRef = ref(database, 'withdrawalRequests');
+                        push(withdrawalRequestsRef, withdrawalData).then(() => {
+                            document.getElementById('message').innerText = "Demande de retrait soumise avec succès.";
+                        }).catch((error) => {
+                            console.error('Erreur lors de la soumission de la demande :', error);
+                            document.getElementById('message').innerText = "Erreur lors de la soumission.";
+                        });
+                    } else {
+                        document.getElementById('message').innerText = "Aucun compte de retrait lié.";
+                    }
+                });
+            } else {
+                document.getElementById('message').innerText = "Veuillez vous connecter pour soumettre une demande.";
+            }
+        });
+    </script>
+
+</body>
+</html>

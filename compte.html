@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liaison de Compte de Retrait</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input {
+            margin: 10px 0;
+            padding: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        button {
+            padding: 10px 20px;
+        }
+        .message {
+            color: green;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Lier un Compte de Retrait</h1>
+        <form id="linkWithdrawForm">
+            <input type="text" id="withdrawNumber" placeholder="Numéro de Retrait" required />
+            <input type="text" id="operator" placeholder="Opérateur" required />
+            <button type="submit">Lier le Compte</button>
+        </form>
+        <div class="message" id="message"></div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
+            authDomain: "ciaxe-727b1.firebaseapp.com",
+            databaseURL: "https://ciaxe-727b1-default-rtdb.firebaseio.com",
+            projectId: "ciaxe-727b1",
+            storageBucket: "ciaxe-727b1.appspot.com",
+            messagingSenderId: "52732576686",
+            appId: "1:52732576686:web:70f5d27fc58bc5bd31fe3f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const database = getDatabase();
+
+        // Soumettre le formulaire de liaison
+        document.getElementById('linkWithdrawForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const user = auth.currentUser;
+
+            if (user) {
+                const withdrawNumber = document.getElementById('withdrawNumber').value;
+                const operator = document.getElementById('operator').value;
+
+                // Enregistrer le compte de retrait dans la base de données
+                const withdrawalAccountRef = ref(database, 'users/' + user.uid + '/withdrawalAccount');
+                set(withdrawalAccountRef, {
+                    withdrawNumber: withdrawNumber,
+                    operator: operator
+                }).then(() => {
+                    document.getElementById('message').innerText = "Compte de retrait lié avec succès.";
+                }).catch((error) => {
+                    console.error('Erreur lors de la liaison du compte :', error);
+                    document.getElementById('message').innerText = "Erreur lors de la liaison du compte.";
+                });
+            } else {
+                document.getElementById('message').innerText = "Veuillez vous connecter pour lier un compte.";
+            }
+        });
+    </script>
+
+</body>
+</html>

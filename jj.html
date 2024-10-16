@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page d'Investissement</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            margin-bottom: 40px;
+        }
+
+        .balance-section {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: white;
+            background-color: red;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .vip-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        .vip-level {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 300px;
+            text-align: center;
+        }
+
+        .vip-level:hover {
+            background-color: #ddd;
+        }
+
+        .invest-button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .invest-button:hover {
+            background-color: #45a049;
+        }
+
+        .total-earnings-info {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #777;
+        }
+
+        .vip-message {
+            margin-top: 10px;
+            font-size: 16px;
+            text-align: center;
+            display: none; /* Hidden by default */
+        }
+
+        .vip-message.error {
+            color: red;
+            display: block; /* Show when there is an error */
+        }
+
+        .vip-message.success {
+            color: green;
+            display: block; /* Show when success */
+        }
+    </style>
+    <script type="module">
+        // Import Firebase scripts
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getDatabase, ref, get, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        // Configurer Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
+            authDomain: "ciaxe-727b1.firebaseapp.com",
+            databaseURL: "https://ciaxe-727b1-default-rtdb.firebaseio.com",
+            projectId: "ciaxe-727b1",
+            storageBucket: "ciaxe-727b1.appspot.com",
+            messagingSenderId: "52732576686",
+            appId: "1:52732576686:web:70f5d27fc58bc5bd31fe3f"
+        };
+
+        // Initialiser Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const database = getDatabase();
+
+        // Fonction pour mettre à jour le solde après l'investissement
+        function updateBalance(userId, newBalance) {
+            const userRef = ref(database, 'users/' + userId);
+            return update(userRef, { balance: newBalance });
+        }
+
+        // Fonction pour ajouter des revenus quotidiens
+        function updateDailyEarnings(userId, vipLevel) {
+            const earnings = vipLevel === 1 ? 8000 : 5999; // Revenus en fonction du niveau VIP
+            const userRef = ref(database, 'users/' + userId);
+
+            // Mettre à jour le solde tous les 24 heures
+            setInterval(() => {
+                get(userRef).then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const newBalance = data.balance + earnings; // Ajouter les revenus quotidiens
+                        update(userRef, { balance: newBalance });
+                    }
+                });
+            }, 86400000); // 86400000 ms = 24 heures
+        }
+
+        // Fonction pour vérifier le solde et investir
+        function invest(investmentAmount, userId, balance, vipLevel, messageElement) {
+            if (balance >= investmentAmount) {
+                const newBalance = balance - investmentAmount;
+                updateBalance(userId, newBalance)
+                    .then(() => {
+                        messageElement.innerText = "Investissement réussi !";
+                        messageElement.classList.remove('error');
+                        messageElement.classList.add('success');
+                        document.getElementById('balance').innerText = `Solde actuel : ${newBalance} FCFA`;
+                        updateDailyEarnings(userId, vipLevel); // Commencer à créditer les revenus quotidiens
+                    })
+                    .catch((error) => {
+                        messageElement.innerText = "Erreur lors de l'investissement.";
+                        messageElement.classList.remove('success');
+                        messageElement.classList.add('error');
+                    });
+            } else {
+                messageElement.innerText = "Solde insuffisant pour cet investissement.";
+                messageElement.classList.remove('success');
+                messageElement.classList.add('error');
+            }
+        }
+
+        // Initialiser la page une fois l'utilisateur connecté
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                const userRef = ref(database, 'users/' + user.uid);
+                get(userRef).then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        const balance = data.balance;
+                        document.getElementById('balance').innerText = `Solde actuel : ${balance} FCFA`;
+
+                        // Ajouter un événement pour les boutons d'investissement
+                        document.getElementById('vip1InvestButton').addEventListener('click', () => {
+                            invest(6000, user.uid, balance, 1, document.getElementById('vip1Message')); // Investir pour VIP1
+                        });
+                        document.getElementById('vip2InvestButton').addEventListener('click', () => {
+                            invest(10000, user.uid, balance, 2, document.getElementById('vip2Message')); // Investir pour VIP2
+                        });
+                    } else {
+                        document.getElementById('balance').innerText = "Aucune donnée trouvée pour cet utilisateur.";
+                    }
+                });
+            } else {
+                document.getElementById('balance').innerText = "Vous n'êtes pas connecté.";
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Page d'Investissement</h1>
+
+        <!-- Section de Solde -->
+        <div class="balance-section" id="balance">
+            Chargement du solde...
+        </div>
+
+        <!-- VIP Selection -->
+        <div class="vip-selection">
+
+            <!-- VIP 1 -->
+            <div class="vip-level">
+                <h2>VIP 1</h2>
+                <p>Investissement : 6000 XOF</p>
+                <p>Revenus quotidien : 8000 XOF</p>
+                <p>Cycle : 69 jours</p>
+                <p class="total-earnings-info">Revenus total : 58 656 XOF</p>
+                <button class="invest-button" id="vip1InvestButton">Investir dans VIP 1</button>
+                <p class="vip-message" id="vip1Message"></p> <!-- Message pour VIP 1 -->
+            </div>
+
+            <!-- VIP 2 -->
+            <div class="vip-level">
+                <h2>VIP 2</h2>
+                <p>Investissement : 10 000 XOF</p>
+                <p>Revenus quotidien : 5999 XOF</p>
+                <p>Cycle : 69 jours</p>
+                <p class="total-earnings-info">Revenus total : 67 656 XOF</p>
+                <button class="invest-button" id="vip2InvestButton">Investir dans VIP 2</button>
+                <p class="vip-message" id="vip2Message"></p> <!-- Message pour VIP 2 -->
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

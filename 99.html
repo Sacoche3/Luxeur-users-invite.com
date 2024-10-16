@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panneau d'Administration des Revenus VIP</title>
+    <style>
+        /* Styles pour le panneau d'administration */
+        .admin-panel {
+            background-color: #ff4444;
+            color: white;
+            padding: 15px;
+            margin: 15px;
+            border-radius: 8px;
+            display: none; /* Caché par défaut */
+        }
+
+        .admin-input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .admin-button {
+            background-color: #ff4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .admin-button:hover {
+            background-color: #cc0000;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Panneau d'administration -->
+<div class="admin-panel" id="adminPanel">
+    <h3>Administration des revenus VIP</h3>
+    <div id="vipInputs">
+        <!-- Les inputs seront générés dynamiquement ici -->
+    </div>
+    <button class="admin-button" onclick="updateVIPEarnings()">Mettre à jour les revenus</button>
+</div>
+
+<script type="module">
+    // Initialisation des revenus VIP
+    let VIP_EARNINGS = {
+        '1': 870,
+        '2': 1700,
+        '3': 2600,
+        '4': 3700,
+        '5': 4700,
+        '6': 8500,
+        '7': 29000,
+        '8': 50000
+    };
+
+    // Vérification du statut d'administration
+    async function checkAdminStatus(user) {
+        const adminRef = ref(database, `admins/${user.uid}`);
+        const snapshot = await get(adminRef);
+        return snapshot.exists();
+    }
+
+    // Création de l'interface admin
+    function createAdminInterface() {
+        const adminPanel = document.getElementById('adminPanel');
+        const vipInputs = document.getElementById('vipInputs');
+        vipInputs.innerHTML = ''; // Réinitialiser les inputs
+
+        Object.entries(VIP_EARNINGS).forEach(([level, earning]) => {
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <label>VIP ${level} : </label>
+                <input type="number" 
+                       class="admin-input" 
+                       id="vip${level}Input" 
+                       value="${earning}" 
+                       min="0" required>
+            `;
+            vipInputs.appendChild(div);
+        });
+
+        adminPanel.style.display = 'block'; // Afficher le panneau
+    }
+
+    // Mettre à jour les revenus VIP
+    async function updateVIPEarnings() {
+        const updates = {};
+        Object.keys(VIP_EARNINGS).forEach(level => {
+            const newValue = parseInt(document.getElementById(`vip${level}Input`).value);
+            if (!isNaN(newValue) && newValue >= 0) {
+                updates[level] = newValue;
+            }
+        });
+
+        try {
+            // Mettre à jour dans la base de données
+            await update(ref(database, 'vipEarnings'), updates);
+            VIP_EARNINGS = { ...VIP_EARNINGS, ...updates };
+            alert('Revenus VIP mis à jour avec succès !');
+        } catch (error) {
+            alert('Erreur lors de la mise à jour : ' + error.message);
+        }
+    }
+
+    // Observer l'état d'authentification
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            document.getElementById('userEmail').textContent = user.email;
+            
+            // Vérifier si l'utilisateur est admin
+            const isAdmin = await checkAdminStatus(user);
+            if (isAdmin) {
+                createAdminInterface();
+            }
+
+            // Charger les revenus VIP depuis la base de données
+            const vipEarningsRef = ref(database, 'vipEarnings');
+            onValue(vipEarningsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    VIP_EARNINGS = { ...VIP_EARNINGS, ...data };
+                }
+            });
+
+            // ... (le reste du code existant pour l'utilisateur connecté) ...
+        } else {
+            window.location.href = 'login.html'; // Redirection vers la page de connexion
+        }
+    });
+</script>
+
+</body>
+</html>

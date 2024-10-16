@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lier Compte de Retrait</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .link-withdraw-container {
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            margin-top: 50px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="link-withdraw-container">
+        <h2>Lier Compte de Retrait</h2>
+        <form id="linkWithdrawForm">
+            <label for="withdrawNumber">Numéro de Retrait :</label>
+            <input type="text" id="withdrawNumber" required>
+
+            <label for="operator">Opérateur :</label>
+            <select id="operator" required>
+                <option value="">Sélectionnez un opérateur</option>
+                <option value="Orange Money">Orange Money</option>
+                <option value="Moov Money">Moov Money</option>
+                <option value="MTN Money">MTN Money</option>
+                <option value="Wave Vague">Wave Vague</option>
+            </select>
+
+            <button type="submit">Lier le Compte</button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+        import { getDatabase, ref, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
+            authDomain: "ciaxe-727b1.firebaseapp.com",
+            databaseURL: "https://ciaxe-727b1-default-rtdb.firebaseio.com",
+            projectId: "ciaxe-727b1",
+            storageBucket: "ciaxe-727b1.appspot.com",
+            messagingSenderId: "52732576686",
+            appId: "1:52732576686:web:70f5d27fc58bc5bd31fe3f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth();
+        const database = getDatabase();
+
+        // Soumettre le formulaire de liaison de compte
+        document.getElementById('linkWithdrawForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const user = auth.currentUser;
+
+            if (user) {
+                const withdrawNumber = document.getElementById('withdrawNumber').value;
+                const operator = document.getElementById('operator').value;
+
+                if (withdrawNumber && operator) {
+                    // Enregistrer les informations du compte de retrait dans la base de données
+                    const userWithdrawRef = ref(database, 'users/' + user.uid + '/withdrawalAccount');
+                    update(userWithdrawRef, {
+                        withdrawNumber: withdrawNumber,
+                        operator: operator
+                    }).then(() => {
+                        alert("Compte de retrait lié avec succès !");
+                        // Redirection vers la page de demande de retrait
+                        window.location.href = "retrait.html";
+                    }).catch((error) => {
+                        console.error('Erreur lors de la liaison du compte de retrait :', error);
+                    });
+                } else {
+                    alert("Veuillez remplir tous les champs.");
+                }
+            } else {
+                alert("Veuillez vous connecter pour lier un compte de retrait.");
+                window.location.href = "retrait.html";
+            }
+        });
+    </script>
+
+</body>
+</html>
