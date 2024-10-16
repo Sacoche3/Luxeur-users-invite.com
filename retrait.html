@@ -57,8 +57,9 @@
         </div>
 
         <p id="currentBalance">Solde actuel : XOF 0</p>
-        <p>horaires de retrait 8H10 a 19H10</p>
-        <p>Vous pouvez retirer n'importe quel montant frais de 2 %</p>
+        <p>Horaires de retrait : 8H10 à 19H10</p>
+        <p>Vous pouvez retirer n'importe quel montant avec des frais de 2 %.</p>
+        <p>Montant minimum de retrait : XOF 600</p>
     </div>
 
     <script type="module">
@@ -112,6 +113,11 @@
             if (user) {
                 const amountToWithdraw = parseFloat(document.getElementById('amount').value);
                 const withdrawPassword = document.getElementById('withdrawPassword').value;
+
+                if (amountToWithdraw < 600) {
+                    alert("Le montant minimum de retrait est de 600 XOF.");
+                    return;
+                }
 
                 if (amountToWithdraw <= 0) {
                     alert("Veuillez entrer un montant valide.");
