@@ -3,57 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REGISTER </title>
-    <link rel="stylesheet" href="styles.css"> <!-- Lien vers le fichier CSS -->
+    <title>Connexion et Inscription</title>
     <style>
-        /* Ajout de styles pour la section de parrainage */
-        .referral-code-section {
-            margin-top: 20px;
+        body {
+            font-family: Arial, sans-serif;
+            background: url('https://image.noelshack.com/fichiers/2024/42/6/1729370025-logo10-19-203314.png') no-repeat center center fixed; /* Image d'arrière-plan */
+            background-size: cover; /* Couvre tout l'écran */
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
         }
-        .referral-code-section input {
+
+        .logo {
+            width: 150px; /* Largeur du logo */
+            height: auto; /* Maintient les proportions de l'image */
+            margin-bottom: 20px; /* Espace sous le logo */
+        }
+
+        .form-container {
+            background-color: rgba(255, 255, 255, 0.9); /* Fond blanc avec opacité pour un effet léger */
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            width: 300px;
+            display: none; /* Par défaut, on cache les deux formulaires */
+            transform: scale(0); /* Échelle initiale pour l'animation */
+            animation: scaleUp 0.5s forwards; /* Animation d'échelle */
+        }
+
+        .active {
+            display: block; /* Active affichera le formulaire */
+            animation: scaleUp 0.5s forwards; /* Animation d'échelle */
+        }
+
+        @keyframes scaleUp {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4CAF50; /* Couleur du titre */
+        }
+
+        input {
             width: 100%;
             padding: 10px;
+            margin: 10px 0;
             border: 1px solid #ccc;
             border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50; /* Couleur de fond des boutons */
+            color: white;
             font-size: 16px;
-            font-weight: bold;
-            background-color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049; /* Couleur au survol */
+        }
+
+        #btnLogin, #btnSignup {
+            background-color: transparent;
+            color: #4CAF50;
+            border: 1px solid #4CAF50;
+            margin-top: 10px;
+        }
+
+        #btnLogin:hover, #btnSignup:hover {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .icon {
+            width: 50px; /* Largeur de l'icône du service client */
+            height: 50px; /* Hauteur de l'icône du service client */
+            display: block;
+            margin: 20px auto; /* Centre l'icône au-dessus du titre */
+            text-align: center;
+            font-size: 30px; /* Taille de l'icône */
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="form-container">
-            <div class="form-toggle">
-                <button id="btnLogin" class="toggle-button">Connexion</button>
-                <button id="btnSignup" class="toggle-button">Inscription</button>
-            </div>
-            <form id="loginForm" class="form active" onsubmit="handleLogin(event)">
-                <h2>Connexion</h2>
-                <input type="email" id="loginEmail" placeholder="Email" required>
-                <input type="password" id="loginPassword" placeholder="Mot de passe" required>
-                <button type="submit">Se connecter</button>
-            </form>
-            <form id="signupForm" class="form" onsubmit="handleSignup(event)">
-                <h2>Inscription</h2>
-                <input type="text" id="signupName" placeholder="Nom" required>
-                <input type="email" id="signupEmail" placeholder="Email" required>
-                <input type="password" id="signupPassword" placeholder="Mot de passe" required>
-                <div class="referral-code-section" id="referralCodeDisplay">
-                    <input type="text" id="generatedReferralCode" readonly>
-                </div>
-                <button type="submit">S'inscrire</button>
-            </form>
-        </div>
+
+    <!-- Logo en haut -->
+    <img src="https://image.noelshack.com/fichiers/2024/42/6/1729370025-logo10-19-203314.png" alt="Logo de l'application" class="logo"> 
+
+    <!-- Icône de service client -->
+    <div class="icone"></div>
+
+    <!-- Formulaire de Connexion -->
+    <div id="loginForm" class="form-container active">
+        <h2>Connexion</h2>
+        <form onsubmit="handleLogin(event)">
+            <input type="email" id="loginEmail" placeholder="E-mail" required><br>
+            <input type="password" id="loginPassword" placeholder="Mot de passe" required><br>
+            <button type="submit">Se connecter</button>
+        </form>
+        <button id="btnSignup">S'inscrire</button>
     </div>
 
-    <!-- Importer les bibliothèques Firebase -->
+    <!-- Formulaire d'Inscription -->
+    <div id="signupForm" class="form-container">
+        <h2>Inscription</h2>
+        <form onsubmit="handleSignup(event)">
+            <input type="text" id="signupName" placeholder="Nom" required><br>
+            <input type="email" id="signupEmail" placeholder="E-mail" required><br>
+            <input type="password" id="signupPassword" placeholder="Mot de passe" required><br>
+            <input type="text" id="generatedReferralCode" placeholder="Code de parrainage" readonly><br>
+            <button type="submit">S'inscrire</button>
+        </form>
+        <button id="btnLogin">Se connecter</button>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
         import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
-        // Configuration de votre application Firebase
+        // Configuration de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
             authDomain: "ciaxe-727b1.firebaseapp.com",
@@ -69,83 +156,74 @@
         const auth = getAuth();
         const database = getDatabase();
 
+        // Gestion des formulaires d'inscription et de connexion
         document.getElementById('btnLogin').addEventListener('click', function() {
             document.getElementById('loginForm').classList.add('active');
             document.getElementById('signupForm').classList.remove('active');
-            document.getElementById('referralCodeDisplay').style.display = 'none'; // Masquer la section de code de parrainage
         });
 
         document.getElementById('btnSignup').addEventListener('click', function() {
             document.getElementById('signupForm').classList.add('active');
             document.getElementById('loginForm').classList.remove('active');
-            document.getElementById('referralCodeDisplay').style.display = 'block'; // Afficher la section de code de parrainage
-            generateReferralCode(); // Générer le code de parrainage dès l'affichage du formulaire d'inscription
+            generateReferralCode(); // Générer un code de parrainage lors de l'affichage du formulaire d'inscription
         });
 
-        // Fonction pour générer un code de parrainage aléatoire
+        // Fonction pour générer un code de parrainage
         function generateReferralCode() {
             const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
             let code = '';
-            for (let i = 0; i < 6; i++) { // Longueur du code de parrainage
+            for (let i = 0; i < 6; i++) {
                 code += characters.charAt(Math.floor(Math.random() * characters.length));
             }
-            document.getElementById('generatedReferralCode').value = code; // Afficher le code généré
+            document.getElementById('generatedReferralCode').value = code;
         }
 
         // Fonction d'inscription
         window.handleSignup = function(event) {
-            event.preventDefault(); // Empêche le rechargement de la page
+            event.preventDefault();
             const name = document.getElementById('signupName').value;
             const email = document.getElementById('signupEmail').value;
             const password = document.getElementById('signupPassword').value;
-            const generatedReferralCode = document.getElementById('generatedReferralCode').value;
+            const referralCode = document.getElementById('generatedReferralCode').value;
 
-            // Créer un nouvel utilisateur avec Firebase Authentication
             createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    // Inscription réussie, ajouter des informations à la base de données
                     const user = userCredential.user;
                     set(ref(database, 'users/' + user.uid), {
                         name: name,
                         email: email,
-                        balance: 0, // Initialiser le solde à 0 lors de l'inscription
-                        referralCode: generatedReferralCode, // Ajouter le code de parrainage
-                        referredBy: null // Pas de code de parrainage, car aucun n'a été saisi
+                        balance: 0,
+                        referralCode: referralCode
                     }).then(() => {
-                        console.log("Informations utilisateur ajoutées à la base de données.");
                         alert("Inscription réussie !");
-                        window.location.href = "investir.html"; // Redirection vers la page de solde
+                        window.location.href = "balance.html"; // Redirection vers une page après l'inscription
                     }).catch((error) => {
-                        console.error("Erreur lors de l'ajout des informations à la base de données:", error);
+                        console.error("Erreur de la base de données:", error);
                         alert("Erreur lors de l'ajout des informations : " + error.message);
                     });
                 })
                 .catch((error) => {
-                    console.error("Erreur lors de l'inscription:", error);
+                    console.error("Erreur d'inscription:", error);
                     alert(error.message);
                 });
-        }
+        };
 
         // Fonction de connexion
         window.handleLogin = function(event) {
-            event.preventDefault(); // Empêche le rechargement de la page
+            event.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
-            // Connexion de l'utilisateur avec Firebase Authentication
             signInWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
-                    // Connexion réussie
-                    const user = userCredential.user;
-                    console.log("Connexion réussie:", user);
                     alert("Connexion réussie !");
-                    window.location.href = "investir.html"; // Redirection vers la page de solde
+                    window.location.href = "balance.html"; // Redirection après connexion
                 })
                 .catch((error) => {
-                    console.error("Erreur lors de la connexion:", error);
+                    console.error("Erreur de connexion:", error);
                     alert(error.message);
                 });
-        }
+        };
     </script>
 </body>
 </html>
