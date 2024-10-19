@@ -153,7 +153,7 @@
         <button class="action-button" onclick="navigate('pt')">Portefeuille 📩</button>
         <button class="action-button" onclick="navigate('service')">service client ☎️</button>
         <button class="action-button" onclick="navigate('index')">déconnexion♀️</button>
-        <button class="action-button" onclick="navigate('historique-recharge')">Historique Recharge 🗑️</button>
+        <button class="action-button" onclick="navigate('historique-Recharge')">Historique Recharge 🗑️</button>
         <button class="action-button recover-button" onclick="recoverEarnings()">Récupérer 💰</button>
     </div>
 
@@ -163,103 +163,126 @@
         <button class="footer-button" onclick="navigate('equipe')">team</button>
         <button class="footer-button" onclick="navigate('balance')">compte</button>
     </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-        import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+   <script type="module">
+         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getDatabase, ref, onValue, update, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
-            authDomain:  "ciaxe-727b1.firebaseapp.com",
-            databaseURL: "https://ciaxe-727b1-default-rtdb.firebaseio.com",
-            projectId: "ciaxe-727b1",
-            storageBucket: "ciaxe-727b1.appspot.com",
-            messagingSenderId: "52732576686",
-            appId: "1:52732576686:web:70f5d27fc58bc5bd31fe3f"
-        };
+const firebaseConfig = {
+    apiKey: "AIzaSyBFREc4PyC6VTYgXN3eEV9_AYpVo6nkyco",
+    authDomain: "ciaxe-727b1.firebaseapp.com",
+    databaseURL: "https://ciaxe-727b1-default-rtdb.firebaseio.com",
+    projectId: "ciaxe-727b1",
+    storageBucket: "ciaxe-727b1.appspot.com",
+    messagingSenderId: "52732576686",
+    appId: "1:52732576686:web:70f5d27fc58bc5bd31fe3f"
+};
 
-        // Initialisation Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth();
-        const database = getDatabase();
+// Initialisation Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const database = getDatabase();
 
-        // Navigation sécurisée
-        window.navigate = function(page) {
-            window.location.href = `${page}.html`;
-        };
+// Navigation sécurisée
+window.navigate = function(page) {
+    window.location.href = `${page}.html`;
+};
 
-        // Calcul des gains en fonction du statut VIP
-        function calculateTotalEarnings(vipStatus) {
-            const VIP_EARNINGS = {
-                '1': 300, '2': 600, '3': 900, '4': 1200, '5': 1500,
-                '6': 1800, '7': 2100, '8': 2400, '9': 2700, '10': 3000,
-                '11': 3300, '12': 3600, '13': 3900, '14': 4200, '15': 4500,
-                '16': 4800, '17': 5200, '18': 5500, '19': 5800, '20': 6100,
-            };
-            return VIP_EARNINGS[vipStatus] || 0;
-        }
+// Calcul des gains en fonction du statut VIP
+function calculateTotalEarnings(vipStatus) {
+    const VIP_EARNINGS = {
+        '1': 300, '2': 600, '3': 900, '4': 1200, '5': 1500,
+        '6': 1800, '7': 2100, '8': 2400, '9': 2700, '10': 3000,
+        '11': 3300, '12': 3600, '13': 3900, '14': 4200, '15': 4500,
+        '16': 4800, '17': 5200, '18': 5500, '19': 5800, '20': 6100,
+    };
+    return VIP_EARNINGS[vipStatus] || 0;
+}
 
-        // Vérifie si un jour s'est écoulé depuis la dernière récupération
-        function hasDayPassed(lastUpdate) {
-            const now = new Date();
-            const lastUpdateDate = new Date(lastUpdate);
-            return now.getDate() !== lastUpdateDate.getDate();
-        }
+// Vérifie si un jour s'est écoulé depuis la dernière récupération
+function hasDayPassed(lastUpdate) {
+    const now = new Date();
+    const lastUpdateDate = new Date(lastUpdate);
+    return now.getDate() !== lastUpdateDate.getDate();
+}
 
-        // Met à jour le solde et la date de la dernière récupération
-        function updateBalance(userId, newBalance, currentDate) {
-            update(ref(database, `users/${userId}`), {
-                balance: newBalance,
-                lastRecovery: currentDate.toISOString()
-            });
-        }
+// Met à jour le solde et la date de la dernière récupération
+function updateBalance(userId, newBalance, currentDate) {
+    update(ref(database, `users/${userId}`), {
+        balance: newBalance,
+        lastRecovery: currentDate.toISOString()
+    });
+}
 
-        // Fonction pour récupérer les gains
-        window.recoverEarnings = function() {
-            const user = auth.currentUser;
-            if (user) {
-                const userRef = ref(database, `users/${user.uid}`);
-                get(userRef).then((snapshot) => {
-                    const userData = snapshot.val();
-                    if (userData) {
-                        const currentDate = new Date();
-                        const lastRecovery = new Date(userData.lastRecovery || 0);
-                        if (hasDayPassed(lastRecovery)) {
-                            const earnings = calculateTotalEarnings(userData.vipStatus || '0');
-                            const newBalance = (userData.balance || 0) + earnings;
-                            updateBalance(user.uid, newBalance, currentDate);
-                            alert(`Vous avez récupéré ${earnings} XOF. Votre nouveau solde est de ${newBalance} XOF.`);
-                            location.reload(); // Recharge la page pour mettre à jour l'affichage
-                        } else {
-                            alert("Vous ne pouvez récupérer vos gains qu'une fois par jour. Veuillez réessayer demain.");
-                        }
-                    }
-                }).catch((error) => {
-                    console.error("Erreur lors de la récupération des données utilisateur :", error);
-                });
-            } else {
-                alert("Vous devez être connecté pour récupérer vos gains.");
+// Fonction pour récupérer les gains
+window.recoverEarnings = function() {
+    const user = auth.currentUser;
+    if (user) {
+        const userRef = ref(database, `users/${user.uid}`);
+        get(userRef).then((snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                const currentDate = new Date();
+                const lastRecovery = new Date(userData.lastRecovery || 0);
+                
+                // Vérifier le niveau VIP
+                if (!userData.vipStatus || userData.vipStatus === '0') {
+                    alert("Vous n'avez pas encore investi. Veuillez investir avant de récupérer vos gains.");
+                    return;
+                }
+
+                if (hasDayPassed(lastRecovery)) {
+                    const earnings = calculateTotalEarnings(userData.vipStatus || '0');
+                    const newBalance = Number(userData.balance || 0) + earnings; // Convertir en nombre et additionner
+                    updateBalance(user.uid, newBalance, currentDate);
+                    alert(`Vous avez récupéré ${earnings} XOF. Votre nouveau solde est de ${newBalance} XOF.`);
+                    location.reload(); // Recharge la page pour mettre à jour l'affichage
+                } else {
+                    alert("Vous ne pouvez récupérer vos gains qu'une fois par jour. Veuillez réessayer demain.");
+                }
             }
-        };
+        }).catch((error) => {
+            console.error("Erreur lors de la récupération des données utilisateur :", error);
+        });
+    } else {
+        alert("Vous devez être connecté pour récupérer vos gains.");
+    }
+};
 
-        // Fonction pour afficher les informations utilisateur
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                document.getElementById("userEmail").textContent = user.email;
-                const userRef = ref(database, `users/${user.uid}`);
-                onValue(userRef, (snapshot) => {
-                    const userData = snapshot.val();
-                    if (userData) {
-                        document.getElementById("balance").textContent = `XOF ${userData.balance || 0}`;
-                        document.getElementById("dailyEarnings").textContent = `${calculateTotalEarnings(userData.vipStatus || '0')} XOF`;
-                        document.getElementById("weeklyEarnings").textContent = `${(calculateTotalEarnings(userData.vipStatus || '0') * 7)} XOF`;
-                        document.getElementById("vipStatus").textContent = `${userData.vipStatus || '0'}`;
-                    }
-                });
-            } else {
-                document.getElementById("userEmail").textContent = "non connecté";
+// Fonction pour additionner les gains
+function addEarnings(currentBalance, dailyEarnings, weeklyEarnings) {
+    return Number(currentBalance) + Number(dailyEarnings) + Number(weeklyEarnings);
+}
+
+// Fonction pour afficher les informations utilisateur
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        document.getElementById("userEmail").textContent = user.email;
+        const userRef = ref(database, `users/${user.uid}`);
+        onValue(userRef, (snapshot) => {
+            const userData = snapshot.val();
+            if (userData) {
+                const dailyEarnings = calculateTotalEarnings(userData.vipStatus || '0');
+                const weeklyEarnings = dailyEarnings * 7;
+                
+                // Récupérer et convertir le solde en nombre
+                const currentBalance = Number(userData.balance) || 0;
+
+                // Afficher les valeurs
+                document.getElementById("balance").textContent = `XOF ${currentBalance}`;
+                document.getElementById("dailyEarnings").textContent = `${dailyEarnings} XOF`;
+                document.getElementById("weeklyEarnings").textContent = `${weeklyEarnings} XOF`;
+                document.getElementById("vipStatus").textContent = `${userData.vipStatus || '0'}`;
+
+                // Calculer et afficher le total des gains
+                const totalEarnings = addEarnings(currentBalance, dailyEarnings, weeklyEarnings);
+                document.getElementById("totalEarnings").textContent = `Total des gains: XOF ${totalEarnings}`;
             }
         });
-    </script>
+    } else {
+        document.getElementById("userEmail").textContent = "non connecté";
+    }
+});
+</script>
 </body>
 </html>
