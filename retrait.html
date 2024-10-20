@@ -57,9 +57,9 @@
         </div>
 
         <p id="currentBalance">Solde actuel : XOF 0</p>
-        <p>Horaires de retrait : 8H10 à 19H10</p>
+        <p>Horaires de retrait : 24/24 et 7j/7</p>
         <p>Vous pouvez retirer n'importe quel montant avec des frais de 10 %.</p>
-        <p>Montant minimum de retrait : XOF 300</p>
+        <p>Montant minimum de retrait : XOF 169</p>
     </div>
 
     <script type="module">
@@ -114,8 +114,8 @@
                 const amountToWithdraw = parseFloat(document.getElementById('amount').value);
                 const withdrawPassword = document.getElementById('withdrawPassword').value;
 
-                if (amountToWithdraw < 300) {
-                    alert("Le montant minimum de retrait est de 300 XOF.");
+                if (amountToWithdraw < 169) {
+                    alert("Le montant minimum de retrait est de 169 XOF.");
                     return;
                 }
 
@@ -134,7 +134,7 @@
                     }
 
                     // Calcul des frais de retrait (2 %)
-                    const withdrawalFee = amountToWithdraw * 0.10;
+                    const withdrawalFee = amountToWithdraw * 0.5;
                     const finalAmount = amountToWithdraw - withdrawalFee;
 
                     if (userBalance >= amountToWithdraw) {
